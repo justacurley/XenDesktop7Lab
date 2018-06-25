@@ -5,6 +5,11 @@ configuration XD7LabSessionHost {
         [ValidateNotNullOrEmpty()]
         [System.String] $XenDesktopMediaPath,
 
+        ## Citrix XenDesktop site name
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [System.String] $SiteName,
+
         ## Citrix XenDesktop delivery controller address(es)
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -43,6 +48,15 @@ configuration XD7LabSessionHost {
         SourcePath = $XenDesktopMediaPath;
         DependsOn = '[WindowsFeature]RDS-RD-Server';
     }
+    #Wait until last DC is joined to the farm before connecting VDAs
+    if ($ControllerAddress.count -gt 1){
+        $WaitforSiteController = $ControllerAddress[-1]
+    }
+    XD7WaitForSite 'WaitForXD7Site' {
+        SiteName = $SiteName;
+        ExistingControllerName = $WaitforSiteControllerAddress;
+        DependsOn = '[XD7Feature]XD7Controller';
+    }
 
     foreach ($controller in $ControllerAddress) {
 
@@ -54,24 +68,13 @@ configuration XD7LabSessionHost {
 
     if ($PSBoundParameters.ContainsKey('RemoteDesktopUsers')) {
 
-        if ($PSBoundParameters.ContainsKey('Credential')) {
+        
 
             Group 'RemoteDesktopUsers' {
                 GroupName = 'Remote Desktop Users';
                 MembersToInclude = $RemoteDesktopUsers;
                 Ensure = 'Present';
-                Credential = $Credential;
-            }
-        }
-        else {
-
-            Group 'RemoteDesktopUsers' {
-                GroupName = 'Remote Desktop Users';
-                MembersToInclude = $RemoteDesktopUsers;
-                Ensure = 'Present';
-            }
-        } #end if Credential
-
+            }      
     } #end if Remote Desktop Users
 
     Registry 'RDSLicenseServer' {

@@ -16,9 +16,9 @@ configuration XD7LabController {
         [System.String] $ExistingControllerAddress,
 
         ## List of all FQDNs and NetBIOS of XenDesktop site controller names for credential delegation
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [System.String[]] $DelegatedComputers,
+        # [Parameter(Mandatory)]
+        # [ValidateNotNullOrEmpty()]
+        # [System.String[]] $DelegatedComputers,
 
         ## Active Directory domain account used to install/configure the Citrix XenDesktop site
         [Parameter()]
@@ -28,16 +28,7 @@ configuration XD7LabController {
         $Credential
     )
 
-    Import-DscResource -ModuleName xCredSSP, XenDesktop7;
-
-    xCredSSP CredSSPServer {
-        Role = 'Server';
-    }
-
-    xCredSSP CredSSPClient {
-        Role = 'Client';
-        DelegateComputers = $DelegatedComputers;
-    }
+    Import-DscResource -ModuleName XenDesktop7;
 
     XD7Feature XD7Controller {
         Role = 'Controller';

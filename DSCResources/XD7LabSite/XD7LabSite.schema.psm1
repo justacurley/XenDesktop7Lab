@@ -16,19 +16,18 @@ configuration XD7LabSite {
         [System.String] $DatabaseServer,
 
         ## Citrix license server FQDN
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [System.String] $LicenseServer,
-
-        ## List of all FQDNs and NetBIOS of XenDesktop site controller names for credential delegation
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [System.String[]] $DelegatedComputers,
+        #[Parameter(Mandatory)]
+        #[ValidateNotNullOrEmpty()]
+        #[System.String] $LicenseServer,
 
         ## List of Active Directory site administrators
-        [Parameter()]
+        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [System.String[]] $SiteAdministrators,
+
+        ## List of all FQDNs and NetBIOS of XenDesktop site controller names for credential delegation
+        [ValidateNotNullOrEmpty()]
+        [System.String[]] $DelegatedComputers,
 
         ## Citrix XenDesktop Site database name
         [Parameter()]
@@ -45,15 +44,15 @@ configuration XD7LabSite {
         [ValidateNotNullOrEmpty()]
         [System.String] $MonitorDatabaseName = "$($SiteName)Monitor",
 
-        ## Citrix XenDesktop licensed edition
-        [Parameter()]
-        [ValidateSet('PLT','ENT','APP')]
-        [System.String] $LicenseEdition = 'PLT',
-
-        ## Citrix XenDesktop licensing model
-        [Parameter()]
-        [ValidateSet('UserDevice','Concurrent')]
-        [System.String] $LicenseModel = 'UserDevice',
+      #  ## Citrix XenDesktop licensed edition
+      #  [Parameter()]
+      #  [ValidateSet('PLT','ENT','APP')]
+      #  [System.String] $LicenseEdition = 'PLT',
+      #
+      #  ## Citrix XenDesktop licensing model
+      #  [Parameter()]
+      #  [ValidateSet('UserDevice','Concurrent')]
+      #  [System.String] $LicenseModel = 'UserDevice',
 
         ## The XML Broker Service trust settings
         [Parameter()]
@@ -68,16 +67,8 @@ configuration XD7LabSite {
         $Credential
     )
 
-    Import-DscResource -ModuleName xCredSSP, XenDesktop7;
+    Import-DscResource -ModuleName XenDesktop7;
 
-    xCredSSP 'CredSSPServer' {
-        Role = 'Server';
-    }
-
-    xCredSSP 'CredSSPClient' {
-        Role = 'Client';
-        DelegateComputers = $DelegatedComputers;
-    }
 
     XD7Feature 'XD7Controller' {
         Role = 'Controller';
@@ -128,30 +119,26 @@ configuration XD7LabSite {
             DependsOn = '[XD7Feature]XD7Controller','[XD7Database]XD7SiteDatabase','[XD7Database]XD7SiteLoggingDatabase','[XD7Database]XD7SiteMonitorDatabase';
         }
 
-        XD7SiteLicense 'XD7SiteLicense' {
-            LicenseServer = $LicenseServer;
-            Credential = $Credential;
-            LicenseEdition = $LicenseEdition;
-            LicenseModel = $LicenseModel;
-            DependsOn = '[XD7Site]XD7Site';
-        }
+        # XD7SiteLicense 'XD7SiteLicense' {
+        #     LicenseServer = $LicenseServer;
+        #     Credential = $Credential;
+        #     LicenseEdition = $LicenseEdition;
+        #     LicenseModel = $LicenseModel;
+        #     DependsOn = '[XD7Site]XD7Site';
+        # }
 
-        if ($PSBoundParameters.ContainsKey('SiteAdministrators')) {
+        foreach ($administrator in $SiteAdministrators) {
 
-            foreach ($administrator in $SiteAdministrators) {
-
-                XD7Administrator $administrator.Replace(' ','') {
-                    Name = $administrator;
-                    Credential = $Credential;
-                }
-            }
-
-            XD7Role 'FullAdministrators' {
-                Name = 'Full Administrator';
-                Members =  $SiteAdministrators;
+            XD7Administrator $administrator.Replace(' ','') {
+                Name = $administrator;
                 Credential = $Credential;
             }
-        
+        }
+
+        XD7Role 'FullAdministrators' {
+            Name = 'Full Administrator';
+            Members =  $SiteAdministrators;
+            Credential = $Credential;
         }
 
         if ($PSBoundParameters.ContainsKey('TrustRequestsSentToXmlServicePort')) {
@@ -200,27 +187,23 @@ configuration XD7LabSite {
             DependsOn = '[XD7Feature]XD7Controller','[XD7Database]XD7SiteDatabase','[XD7Database]XD7SiteLoggingDatabase','[XD7Database]XD7SiteMonitorDatabase';
         }
 
-        XD7SiteLicense 'XD7SiteLicense' {
-            LicenseServer = $LicenseServer;
-            LicenseEdition = $LicenseEdition;
-            LicenseModel = $LicenseModel;
-            DependsOn = '[XD7Site]XD7Site';
+      #  XD7SiteLicense 'XD7SiteLicense' {
+      #      LicenseServer = $LicenseServer;
+      #      LicenseEdition = $LicenseEdition;
+      #      LicenseModel = $LicenseModel;
+      #      DependsOn = '[XD7Site]XD7Site';
+      #  }
+
+        foreach ($administrator in $SiteAdministrators) {
+
+            XD7Administrator $administrator.Replace(' ','') {
+                Name = $administrator;
+            }
         }
 
-        if ($PSBoundParameters.ContainsKey('SiteAdministrators')) {
-            
-            foreach ($administrator in $SiteAdministrators) {
-
-                XD7Administrator $administrator.Replace(' ','') {
-                    Name = $administrator;
-                }
-            }
-
-            XD7Role 'FullAdministrators' {
-                Name = 'Full Administrator';
-                Members =  $SiteAdministrators;
-            }
-
+        XD7Role 'FullAdministrators' {
+            Name = 'Full Administrator';
+            Members =  $SiteAdministrators;
         }
 
         if ($PSBoundParameters.ContainsKey('TrustRequestsSentToXmlServicePort')) {
@@ -231,6 +214,6 @@ configuration XD7LabSite {
                 DependsOn = '[XD7Site]XD7Site';
             }
         } #end if TrustRequestsSentToXmlServicePort
-    }
+    # }
 
 } #end configuration XD7LabSite

@@ -21,9 +21,9 @@ configuration XD7LabSessionHost {
         [System.String] $RDSLicenseServer,
 
         ## Users/groups to add to the local Remote Desktop Users group
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String[]] $RemoteDesktopUsers,
+        # [Parameter()]
+        # [ValidateNotNullOrEmpty()]
+        # [System.String[]] $RemoteDesktopUsers,
 
         ## Active Directory domain account used to communicate with AD for Remote Desktop Users
         [Parameter()]
@@ -35,12 +35,17 @@ configuration XD7LabSessionHost {
 
     Import-DscResource -ModuleName XenDesktop7;
 
-    foreach ($feature in @('RDS-RD-Server', 'Remote-Assistance', 'Desktop-Experience')) {
+    foreach ($feature in @('RDS-RD-Server', 'Remote-Assistance')) {
 
         WindowsFeature $feature {
             Name = $feature;
             Ensure = 'Present';
         }
+    }
+
+    XD7Feature 'XD7Studio' {
+        Role = 'Studio';
+        SourcePath = $XenDesktopMediaPath;
     }
 
     XD7VDAFeature 'XD7SessionVDA' {
@@ -52,10 +57,14 @@ configuration XD7LabSessionHost {
     if ($ControllerAddress.count -gt 1){
         $WaitforSiteController = $ControllerAddress[-1]
     }
+    else {
+        $WaitforSiteController = $ControllerAddress
+    }
+
     XD7WaitForSite 'WaitForXD7Site' {
         SiteName = $SiteName;
-        ExistingControllerName = $WaitforSiteControllerAddress;
-        DependsOn = '[XD7Feature]XD7Controller';
+        ExistingControllerName = $WaitforSiteController;
+        DependsOn = '[XD7VDAFeature]XD7SessionVDA';
     }
 
     foreach ($controller in $ControllerAddress) {
@@ -66,16 +75,13 @@ configuration XD7LabSessionHost {
         }
     }
 
-    if ($PSBoundParameters.ContainsKey('RemoteDesktopUsers')) {
-
-        
-
-            Group 'RemoteDesktopUsers' {
-                GroupName = 'Remote Desktop Users';
-                MembersToInclude = $RemoteDesktopUsers;
-                Ensure = 'Present';
-            }      
-    } #end if Remote Desktop Users
+    # if ($PSBoundParameters.ContainsKey('RemoteDesktopUsers')) {
+    #         Group 'RemoteDesktopUsers' {
+    #             GroupName = 'Remote Desktop Users';
+    #             MembersToInclude = $RemoteDesktopUsers;
+    #             Ensure = 'Present';                
+    #         }      
+    # } #end if Remote Desktop Users
 
     Registry 'RDSLicenseServer' {
         Key = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\TermService\Parameters\LicenseServers';

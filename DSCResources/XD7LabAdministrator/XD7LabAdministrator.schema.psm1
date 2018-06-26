@@ -33,8 +33,7 @@ configuration XD7LabAdministrator {
             ## Create DOMAIN\UserName credential
             $netBIOSUsername = '{0}\{1}' -f $netBIOSDomainName, $Credential.UserName;
             $domainCredential = New-Object System.Management.Automation.PSCredential($netBIOSUsername, $Credential.Password);
-        }
-    }
+        }    
 
     foreach ($admin in $Administrator) {
 

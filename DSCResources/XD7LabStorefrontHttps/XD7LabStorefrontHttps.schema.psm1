@@ -20,7 +20,7 @@ configuration XD7LabStorefrontHttps {
         $PfxCertificateCredential,
 
         ## Personal information exchange (Pfx) ertificate file path
-        [Parameter()]
+        [Parameter()] 
         [System.String] $PfxCertificatePath
     )
 
@@ -67,6 +67,11 @@ configuration XD7LabStorefrontHttps {
         DependsOn = '[WindowsFeature]Web-Server';
     }
 
+    XD7Feature 'XD7Studio' {
+        Role = 'Studio';
+        SourcePath = $XenDesktopMediaPath;
+    }
+
     foreach ($controller in $ControllerAddress) {
 
         xWebConfigKeyValue "ServiceAutoDiscovery_$controller" {
@@ -94,7 +99,6 @@ configuration XD7LabStorefrontHttps {
 
         $xWebSiteDependsOn += '[xPfxImport]PfxCertificate';
     }
-
     xWebSite 'DefaultWebSite' {
         Name = 'Default Web Site';
         PhysicalPath = 'C:\inetpub\wwwroot';

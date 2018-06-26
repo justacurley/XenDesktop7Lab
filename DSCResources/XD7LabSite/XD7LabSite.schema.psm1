@@ -214,6 +214,6 @@ configuration XD7LabSite {
                 DependsOn = '[XD7Site]XD7Site';
             }
         } #end if TrustRequestsSentToXmlServicePort
-    # }
+     }
 
 } #end configuration XD7LabSite

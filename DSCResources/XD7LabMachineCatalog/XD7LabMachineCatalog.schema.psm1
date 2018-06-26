@@ -4,6 +4,11 @@ configuration XD7LabMachineCatalog {
         [Parameter(Mandatory)]
         [System.String] $Name,
 
+        ## Citrix XenDesktop installation source root
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [System.String] $XenDesktopMediaPath,
+
         ## Machine catalog computer accounts/members
         [Parameter(Mandatory)]
         [System.String[]] $ComputerName,
@@ -44,6 +49,11 @@ configuration XD7LabMachineCatalog {
     Import-DscResource -ModuleName XenDesktop7;
     $resourceName = $Name.Replace(' ','_');
 
+    #Studio required for administrative citrix PSsnappins
+    XD7Feature 'XD7Studio' {
+        Role = 'Studio';
+        SourcePath = $XenDesktopMediaPath;
+    }
     ## Machine catalog members should not be FQDNs
     $catalogMembers = @();
     foreach ($member in $ComputerName) {

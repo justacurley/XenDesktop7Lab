@@ -13,7 +13,7 @@ configuration XD7LabController {
         ## Existing XenDesktop controller used to join the site
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [System.String] $ExistingControllerAddress,
+        [System.String] $ExistingControllerAddress, 
 
         ## List of all FQDNs and NetBIOS of XenDesktop site controller names for credential delegation
         # [Parameter(Mandatory)]

@@ -215,5 +215,4 @@ configuration XD7LabSite {
             }
         } #end if TrustRequestsSentToXmlServicePort
      }
-
 } #end configuration XD7LabSite

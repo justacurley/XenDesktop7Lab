@@ -13,7 +13,7 @@ configuration XD7LabStorefront {
 
     $features = @(
         'NET-Framework-45-ASPNET',
-        'Web-Server',
+        'Web-Server', 
         'Web-Common-Http',
         'Web-Default-Doc',
         'Web-Http-Errors',

@@ -8,7 +8,7 @@
     Description = 'Citrix XenDesktop 7 Lab DSC Composite Resources.';
     PowerShellVersion = '4.0';
     CLRVersion = '4.0';
-    RequiredModules = @('XenDesktop7', 'xCredSSP');
+    RequiredModules = @('XenDesktop7');
     PrivateData = @{
         PSData = @{  # Private data to pass to the module specified in RootModule/ModuleToProcess
             Tags = @('VirtualEngine','Citrix','XenDesktop','XenApp','Composite','DSC');
